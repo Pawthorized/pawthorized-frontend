@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+<!-- SEO Meta -->
+<title>Get Started | Pawthorized – Certified Service Animal ID  </title>
+<meta name="description" content="Get your Certified Service Animal ID in minutes. Fill out the form, upload your pet photo, and receive your Apple/Google Wallet-ready ID instantly." />
+<meta name="author" content="Pawthorized" />
+
+<!-- Open Graph (for Facebook, iMessage, etc.) -->
+<meta property="og:title" content="Get Your Certified Service Animal ID – Pawthorized" />
+<meta property="og:description" content="Start the process to get your official digital Service Animal ID. Just $19.99 for lifetime access." />
+<meta property="og:image" content="https://pawthorized.com/assets/img/og-image.jpg" />
+<meta property="og:url" content="https://pawthorized.com/getstarted.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Pawthorized" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Get Your Certified Service Animal ID" />
+<meta name="twitter:description" content="Fast, digital, and wallet-ready. Begin your application now for only $19.99." />
+<meta name="twitter:image" content="https://pawthorized.com/assets/img/og-image.jpg" />
+
+        <link rel="icon" type="image/x-icon" href="assets/favicon.svg" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Google fonts-->
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+        <!-- Cropper CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+        
+          
+    </head>
+    <body id="page-top">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
+            <div class="container px-5">
+                <a class="navbar-brand fw-bold gradient-text" href="index.html">
+                    <img src="assets/img/logo.svg" class="gradient-logo" alt="Pawthorized Logo" width="40" height="40">
+                    PAWTHORIZED
+                </a>
+                
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    
+                    <i class="bi-list" style="font-size: 25px;"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
+                        <li class="nav-item"><a class="nav-link me-lg-3" href="index.html#how-it-works">How It Works</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link me-lg-3" href="#" data-bs-toggle="modal" data-bs-target="#feedbackModal">Contact Us</a>
+                        </li>
+                        
+                    </ul>
+                    <button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" onclick="window.location.href='getstarted.html'">
+                        <span class="d-flex align-items-center">
+                            <i class="bi-phone me-2"></i>
+                            <span class="small">Get My Service Animal ID</span>
+                        </span>
+                    </button>                    
+                </div>
+            </div>
+        </nav>
+      
+        <section id="get-started" class="py-5" style="margin-top: 45px;">
+            <div class="container px-5 text-center">
+                <img src="assets/img/service_animal.svg" alt="Service Animal" class="mb-4" style="max-width: 200px; padding-top: 20px;" />
+                <form action="https://pawthorized-backend.onrender.com/create-pass" method="POST" enctype="multipart/form-data" id="registrationForm">
+
+            <!-- Pet's Name -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+            <div class="form-floating mb-3">
+                <input class="form-control" id="petName" name="petName" type="text" placeholder="Enter your pet's name" required />
+                <label for="petName">Pet's Name</label>
+            </div>
+        
+            <!-- Breed -->
+            <div class="form-floating mb-3">
+                <input class="form-control" id="breed" name="breed" type="text" placeholder="Breed" />
+                <label for="breed">Breed</label>
+            </div>
+        
+            <!-- Registry Number -->
+            <div class="form-floating mb-3">
+                <input class="form-control" id="registryNumber" name="registryNumber" type="text" placeholder="Registry #" />
+                <label for="registryNumber">Registry Number*</label>
+                <small class="form-text text-muted" style="display: block; text-align: left;">*Not required unless already issued.</small>
+            </div>
+        
+            <!-- Microchip Number -->
+            <div class="form-floating mb-3">
+                <input class="form-control" id="microchipNumber" name="microchipNumber" type="text" placeholder="Microchip #" />
+                <label for="microchipNumber">Microchip Number (Optional)</label>
+            </div>
+        
+            <!-- Handler Name -->
+            <div class="form-floating mb-3">
+                <input class="form-control" id="handlerName" name="handlerName" type="text" placeholder="Handler Name" required />
+                <label for="handlerName">Handler Name</label>
+            </div>
+        
+            <!-- Phone -->
+            <div class="form-floating mb-3">
+                <input class="form-control" id="phone" name="phone" type="tel" placeholder="Phone" required />
+                <label for="phone">Phone Number</label>
+            </div>
+        
+            <!-- Email -->
+            <div class="form-floating mb-3">
+                <input class="form-control" id="email" name="email" type="email" placeholder="Email" required />
+                <label for="email">Email</label>
+            </div>
+        
+            <!-- Additional Handler -->
+            <div class="form-check mb-3 text-start">
+                <input class="form-check-input" type="checkbox" id="additionalHandler" name="additionalHandler" />
+                <label class="form-check-label" for="additionalHandler">
+                    Add Another Authorized Handler (+$9.99)
+                </label>
+                <small class="form-text text-muted" style="display: block; text-align: left;">
+                    Assign a trusted family member or caregiver as an additional handler — includes their own digital ID.
+                  </small>
+            </div>
+        
+            <div class="form-floating mb-3 d-none" id="additionalHandlerField">
+                <input class="form-control" id="additionalHandlerName" name="additionalHandlerName" type="text" placeholder="Additional Handler Name" />
+                <label for="additionalHandlerName">Additional Handler Name</label>
+            </div>
+        
+            <div class="form-floating mb-3 d-none" id="additionalEmailField">
+                <input class="form-control" id="additionalEmail" name="additionalEmail" type="email" placeholder="Additional Email" />
+                <label for="additionalEmail">Additional Handler Email</label>
+            </div>
+        
+<!-- Pet Image -->
+<div class="mb-4">
+    <label for="petPicture" class="form-label text-start">Upload Pet Picture</label>
+    <input class="form-control" type="file" id="petPicture" accept="image/*" required/>
+    <small class="form-text text-muted" style="display: block; text-align: left;">
+        iPhone users: please screenshot your pet photo before uploading to ensure compatibility.
+      </small>
+</div>
+
+<!-- Image Preview & Crop Area -->
+<div id="previewContainer" style="display: none;">
+    <img id="previewImage" style="max-width: 100%; max-height: 300px;" />
+    <button type="button" class="btn btn-success mt-2" id="cropButton">Crop</button>
+</div>
+
+<!-- Green Check Status -->
+<div id="statusMessage" class="mt-3 text-success fw-bold d-none mb-3">✅ Image is successfully cropped and uploaded</div>
+
+<!-- Hidden Base64 Field -->
+<input type="hidden" name="petImageBase64" id="petImageBase64" />
+
+  
+
+<!-- Add this inside your existing <form> right above the Submit button -->
+<!-- Poynt Collect Payment Section -->
+<div class="card p-3 mb-3 border shadow">
+    <h5 class="mb-3">Payment Information</h5>
+    <div id="card-element"></div>
+</div>
+
+<!-- Submit Button (no change, already exists) -->
+<div class="d-grid mt-4">
+    <button type="submit" class="btn btn-primary py-3 rounded-pill" id="submit">
+        Complete Payment - $19.99
+    </button>
+    <div id="payment-message" style="margin-top: 10px;"></div>
+    <small class="text-muted d-block mt-2" style="font-size: 0.7rem;">
+        By placing your order, you agree to our
+        <a href="terms.html" class="text-decoration-underline text-muted">Terms</a> and
+        <a href="privacy.html" class="text-decoration-underline text-muted">Privacy Policy</a>.
+      </small>
+</div>
+            </div>
+        </div>
+        </form>
+        </div>
+        </section>
+          <!-- SDK Loader -->
+          <script>
+            const script = document.createElement("script");
+            script.src = "https://cdn.poynt.net/collect.js";
+            script.async = true;
+          
+            script.onload = () => {
+              const collect = new TokenizeJs(
+                "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
+                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
+              );
+          
+              collect.mount("card-element", document, {
+                displayComponents: {
+                  labels: true,
+                  zipCode: true,
+                  firstName: true,
+                  lastName: true,
+                  emailAddress: true,
+                },
+                iFrame: {
+                  width: "100%",
+                  height: "400px",
+                  border: "none",
+                  borderRadius: "6px",
+                },
+                inlineErrors: true,
+                enableReCaptcha: true,
+                paymentMethods: ["card", "apple_pay", "google_pay"],
+                style: { theme: "ecommerce" },
+              });
+          
+              // 💬 Message display helper
+              function showPaymentMessage(message, type = "success") {
+                const box = document.getElementById("payment-message");
+                box.innerText = message;
+                box.style.padding = "10px 15px";
+                box.style.borderRadius = "6px";
+                box.style.marginTop = "12px";
+                box.style.fontWeight = "bold";
+          
+                if (type === "success") {
+                  box.style.backgroundColor = "#e6ffed";
+                  box.style.color = "#067d45";
+                  box.style.border = "1px solid #0f9d58";
+                } else if (type === "error") {
+                  box.style.backgroundColor = "#ffe6e6";
+                  box.style.color = "#b00020";
+                  box.style.border = "1px solid #ff5f5f";
+                } else {
+                  box.style.backgroundColor = "#f0f0f0";
+                  box.style.color = "#333";
+                  box.style.border = "1px solid #ccc";
+                }
+              }
+          
+              let retryCount = 0;
+              const MAX_RETRIES = 2;
+          
+              document.getElementById("submit").onclick = () => {
+                const form = document.getElementById("registrationForm");
+          
+                if (!form.checkValidity()) {
+                  form.reportValidity();
+                  return;
+                }
+          
+                // Proceed to get nonce
+                document.getElementById("submit").disabled = true;
+                document.getElementById("submit").innerText = "Processing...";
+                showPaymentMessage(""); // clear previous messages
+                collect.getNonce();
+              };
+          
+              collect.on("nonce", async (event) => {
+                try {
+                    const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      nonce: event.data.nonce,
+                      zip: event.data.zipCode,
+                      email: event.data.emailAddress,
+                    }),
+                  });
+          
+                  const result = await res.json();
+          
+                  if (!res.ok) {
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                      document.getElementById("submit").disabled = false;
+                      document.getElementById("submit").innerText = "Complete Payment - $19.99";
+                    } else {
+                      document.getElementById("submit").innerText = "❌ Retry Limit Reached";
+                    }
+          
+                    console.error("Backend Response (Declined):", result.raw || result.error);
+                    showPaymentMessage(result.message || "❌ Payment was declined.", "error");
+                    return;
+                  }
+          
+                  // ✅ Success
+                  showPaymentMessage("✅ " + result.message, "success");
+          
+                  // 🚀 Trigger pass logic here if needed
+          
+                } catch (err) {
+                  console.error("❌ Error submitting payment:", err);
+                  showPaymentMessage("❌ Payment failed.", "error");
+                  document.getElementById("submit").disabled = false;
+                  document.getElementById("submit").innerText = "Complete Payment - $19.99";
+                }
+              });
+          
+              collect.on("error", (event) => {
+                console.error("Poynt Error:", event);
+                showPaymentMessage("❌ Payment form incomplete or invalid. Please check and try again.", "error");
+          
+                // 🔁 Re-enable button to allow retry
+                document.getElementById("submit").disabled = false;
+                document.getElementById("submit").innerText = "Complete Payment - $19.99";
+              });
+            };
+          
+            document.head.appendChild(script);
+          </script>
+          
+          
+    
+
+        
+        
+        
+        <!-- Call to Action Section -->
+<aside class="text-center bg-gradient-primary-to-secondary">
+    <div class="container px-5">
+        <div class="row gx-5 justify-content-center">
+            <div class="col-xl-8">
+                <div class="h2 fs-1 text-white mb-4">
+                    Enjoy hassle-free travel and public access with a trusted digital ID.
+                </div>
+                <p class="text-white-75 mb-2" style="color: white;">Recognized by</p>
+                <p class="text-white-75 mb-4" style="color: white; font-size: larger;"> <strong>Landlords</strong>, <strong>Airlines</strong>, and <strong>Businesses</strong>.</p>
+                <p class="text-white-75 mb-4" style="color: white;">
+                    Instantly get your <strong>Certified Service Animal ID</strong> and keep it on your phone for easy access <strong>anywhere, anytime</strong>.
+                </p>
+                
+                <div class="d-flex flex-row align-items-center justify-content-center gap-3">
+                    <a href="getstarted.html">
+                        <img src="assets/img/app-store-badge.svg" alt="App Store" class="app-badge" style="height: 45px; width: auto;" />
+                      </a>
+                    <a href="getstarted.html">
+                      <img src="assets/img/google-play-badge.svg" alt="Google Play" class="app-badge" style="height: 45px; width: auto;" />
+                    </a>
+                  </div>
+                  
+            </div>
+            </div>
+        </div>
+    </div>
+</aside>
+       
+        <!-- Footer-->
+        <footer class="bg-black text-center py-5">
+            <div class="container px-5">
+                <div class="text-white-50 small">
+                    <div class="mb-2">&copy; Pawthorized 2025. All Rights Reserved.</div>
+                    <a href="privacy.html">Privacy</a>
+                    <span class="mx-1">&middot;</span>
+                    <a href="terms.html">Terms</a>
+                    <span class="mx-1">&middot;</span>
+                    <a href="cookies.html">Cookies</a>
+                </div>
+            </div>
+        </footer>
+        <!-- Feedback Modal-->
+        <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-gradient-primary-to-secondary p-4">
+                        <h5 class="modal-title font-alt text-white" id="feedbackModalLabel">Contact Us</h5>
+                        <button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body border-0 p-4">
+                        
+                        <form id="contactForm" method="POST" novalidate>
+                            <div class="form-floating mb-3">
+                              <input class="form-control" id="name" name="name" type="text" placeholder="Your name" required />
+                              <label for="name">Full name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                              <input class="form-control" id="email" name="email" type="email" placeholder="name@example.com" required />
+                              <label for="email">Email address</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                              <input class="form-control" id="phone" name="phone" type="tel" placeholder="(123) 456-7890" />
+                              <label for="phone">Phone number</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                              <textarea class="form-control" id="message" name="message" style="height: 10rem" placeholder="Your message..." required></textarea>
+                              <label for="message">Message</label>
+                            </div>
+                          
+                            <div class="d-none" id="submitSuccessMessage">
+                              <div class="text-center text-success mb-3">Message sent! We'll be in touch soon.</div>
+                            </div>
+                            <div class="d-none" id="submitErrorMessage">
+                              <div class="text-center text-danger mb-3">Oops! Something went wrong.</div>
+                            </div>
+                          
+                            <div class="d-grid">
+                              <button type="submit" id="submitButton" class="btn btn-primary rounded-pill btn-lg">Submit</button>
+                            </div>
+                          </form>  
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              const form = document.getElementById("contactForm");
+              if (!form) return;
+          
+              const successMsg = document.getElementById("submitSuccessMessage");
+              const errorMsg = document.getElementById("submitErrorMessage");
+              const submitBtn = document.getElementById("submitButton");
+          
+              form.addEventListener("submit", function (e) {
+                e.preventDefault();
+          
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Sending...";
+          
+                const formData = new FormData(form);
+          
+                fetch("https://formspree.io/f/mvgkwwln", {
+                  method: "POST",
+                  headers: { Accept: "application/json" },
+                  body: formData
+                })
+                  .then((response) => {
+                    if (response.ok) {
+                      successMsg.classList.remove("d-none");
+                      errorMsg.classList.add("d-none");
+                      form.reset();
+          
+                      setTimeout(() => {
+                        const modalEl = document.getElementById("feedbackModal");
+                        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modal.hide();
+                        successMsg.classList.add("d-none");
+                      }, 2000);
+                    } else {
+                      throw new Error();
+                    }
+                  })
+                  .catch(() => {
+                    errorMsg.classList.remove("d-none");
+                    successMsg.classList.add("d-none");
+                  })
+                  .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Submit";
+                  });
+              });
+            });
+          </script>       
+        <!-- Cropper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    </body>
+</html>
