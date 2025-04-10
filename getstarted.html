@@ -199,7 +199,10 @@
               fetch("https://pawthorized-backend.onrender.com/get-amount", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ additionalHandler: document.getElementById("additionalHandler")?.value || "off" })
+                body: JSON.stringify({
+  additionalHandler: document.getElementById("additionalHandler")?.checked ? "on" : "off"
+})
+
               })
                 .then(response => response.json())
                 .then(data => {
@@ -227,8 +230,9 @@
                     inlineErrors: true,
                     enableReCaptcha: true,
                     paymentMethods: ["card", "apple_pay", "google_pay"],
-                    style: { theme: "ecommerce" }
-                    // Remove amount and currency from here; handle in tokenize
+                    style: { theme: "ecommerce" },
+                    amount: parseFloat(data.amount) * 100, // Convert to cents: 1999 or 2998
+                    currency: "USD"
                   });
           
                   function showPaymentMessage(message, type = "success") {
@@ -266,15 +270,11 @@
                     document.getElementById("submit").disabled = true;
                     document.getElementById("submit").innerText = "Processing...";
                     showPaymentMessage("");
-          
-                    // Tokenize with amount for Apple Pay
-                    collect.tokenize({
-                      amount: parseFloat(data.amount) * 100, // Convert to cents (e.g., 1999)
-                      currency: "USD"
-                    });
+                    collect.getNonce(); // Revert to getNonce for consistency
                   };
           
                   collect.on("nonce", async (event) => {
+                    console.log("Nonce event:", event); // Debug: Check amount here
                     try {
                       const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
                         method: "POST",
@@ -283,7 +283,8 @@
                           nonce: event.data.nonce,
                           zip: event.data.zipCode,
                           email: event.data.emailAddress,
-                          additionalHandler: document.getElementById("additionalHandler")?.value || "off"
+                          additionalHandler: document.getElementById("additionalHandler")?.checked ? "on" : "off"
+
                         }),
                       });
           
@@ -326,7 +327,6 @@
           
             document.head.appendChild(script);
           </script>
-          
           
           
     
