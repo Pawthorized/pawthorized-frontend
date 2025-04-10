@@ -197,16 +197,27 @@
           
             script.onload = () => {
               const collect = new TokenizeJs(
-                "5fce6843-6d14-4efe-9a76-88d15d1b2557",
-                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a"
+                "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
+                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
               );
           
               collect.mount("card-element", document, {
-                displayComponents: { labels: true, zipCode: true, firstName: true, lastName: true, emailAddress: true },
-                iFrame: { width: "100%", height: "400px", border: "none", borderRadius: "6px" },
+                displayComponents: {
+                  labels: true,
+                  zipCode: true,
+                  firstName: true,
+                  lastName: true,
+                  emailAddress: true
+                },
+                iFrame: {
+                  width: "100%",
+                  height: "400px",
+                  border: "none",
+                  borderRadius: "6px"
+                },
                 inlineErrors: true,
                 enableReCaptcha: true,
-                paymentMethods: ["card", "apple_pay", "google_pay"],
+                paymentMethods: ["card"], // ✅ only real cards now
                 style: { theme: "ecommerce" }
               });
           
@@ -249,7 +260,7 @@
                 document.getElementById("submit").innerText = `Complete Payment - $${amount}`;
               }
           
-              let amountInDollars = "19.99"; // global fallback
+              let amountInDollars = "19.99"; // fallback
           
               document.getElementById("submit").onclick = () => {
                 const form = document.getElementById("registrationForm");
@@ -265,101 +276,14 @@
                 fetch("https://pawthorized-backend.onrender.com/get-amount", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ additionalHandler: document.getElementById("additionalHandler").checked ? "on" : "off" })
+                  body: JSON.stringify({
+                    additionalHandler: document.getElementById("additionalHandler").checked ? "on" : "off"
+                  })
                 })
                   .then(response => response.json())
                   .then(data => {
-                    console.log("Fetched amount:", data.amount);
-                    const amountInCents = parseFloat(data.amount) * 100;
                     amountInDollars = parseFloat(data.amount).toFixed(2);
-          
-                    // Apple Pay
-                    if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
-                      const paymentRequest = {
-                        countryCode: "US",
-                        currencyCode: "USD",
-                        supportedNetworks: ["visa", "masterCard", "amex", "discover"],
-                        merchantCapabilities: ["supports3DS"],
-                        total: { label: "Pawthorized", amount: amountInDollars }
-                      };
-          
-                      const session = new ApplePaySession(6, paymentRequest);
-                      session.begin();
-          
-                      session.onvalidatemerchant = async (event) => {
-                        session.completeMerchantValidation({});
-                        collect.tokenize({ amount: amountInCents, currency: "USD" });
-                      };
-          
-                      session.onpaymentauthorized = (event) => {
-                        collect.tokenize({ amount: amountInCents, currency: "USD" });
-                        session.completePayment(ApplePaySession.STATUS_SUCCESS);
-                      };
-          
-                      session.oncancel = () => {
-                        showPaymentMessage("❌ Payment cancelled.", "error");
-                        resetButton(amountInDollars);
-                      };
-                    }
-          
-                    // Google Pay
-                    else if (window.PaymentRequest) {
-                      const paymentRequest = {
-                        apiVersion: 2,
-                        apiVersionMinor: 0,
-                        allowedPaymentMethods: [{
-                          type: "CARD",
-                          parameters: {
-                            allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                            allowedCardNetworks: ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
-                          },
-                          tokenizationSpecification: {
-                            type: "PAYMENT_GATEWAY",
-                            parameters: {
-                              gateway: "poynt",
-                              gatewayMerchantId: "5fce6843-6d14-4efe-9a76-88d15d1b2557"
-                            }
-                          }
-                        }],
-                        merchantInfo: { merchantId: "5fce6843-6d14-4efe-9a76-88d15d1b2557", merchantName: "Pawthorized" },
-                        transactionInfo: {
-                          totalPriceStatus: "FINAL",
-                          totalPrice: amountInDollars,
-                          currencyCode: "USD"
-                        }
-                      };
-          
-                      const request = new PaymentRequest([paymentRequest], {
-                        total: { label: "Total", amount: { currency: "USD", value: amountInDollars } }
-                      });
-          
-                      request.canMakePayment()
-                        .then(canPay => {
-                          if (canPay) {
-                            request.show()
-                              .then(response => {
-                                response.complete("success");
-                                collect.tokenize({ amount: amountInCents, currency: "USD" });
-                              })
-                              .catch(err => {
-                                console.error("Google Pay error:", err);
-                                showPaymentMessage("❌ Payment cancelled.", "error");
-                                resetButton(amountInDollars);
-                              });
-                          } else {
-                            collect.tokenize({ amount: amountInCents, currency: "USD" });
-                          }
-                        })
-                        .catch(err => {
-                          console.error("Google Pay canMakePayment error:", err);
-                          collect.tokenize({ amount: amountInCents, currency: "USD" });
-                        });
-                    }
-          
-                    // Fallback for card
-                    else {
-                      collect.tokenize({ amount: amountInCents, currency: "USD" });
-                    }
+                    collect.getNonce(); // 💳 get card nonce
                   })
                   .catch(error => {
                     console.error("Fetch error:", error);
