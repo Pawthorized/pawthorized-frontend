@@ -195,140 +195,133 @@
             script.src = "https://cdn.poynt.net/collect.js";
             script.async = true;
           
-            script.onload = async () => {
-              try {
-                const additionalHandler = document.getElementById("additionalHandler")?.checked ? "on" : "off";
+            script.onload = () => {
+              fetch("https://pawthorized-backend.onrender.com/get-amount", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ additionalHandler: document.getElementById("additionalHandler")?.value || "off" })
+              })
+                .then(response => response.json())
+                .then(data => {
+                  console.log("Fetched amount:", data.amount); // Debug: "19.99" or "29.98"
           
-                const amountRes = await fetch("https://pawthorized-backend.onrender.com/get-amount", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ additionalHandler })
-                });
+                  const collect = new TokenizeJs(
+                    "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
+                    "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
+                  );
           
-                const data = await amountRes.json();
-                const amount = data.amount;
+                  collect.mount("card-element", document, {
+                    displayComponents: {
+                      labels: true,
+                      zipCode: true,
+                      firstName: true,
+                      lastName: true,
+                      emailAddress: true,
+                    },
+                    iFrame: {
+                      width: "100%",
+                      height: "400px",
+                      border: "none",
+                      borderRadius: "6px",
+                    },
+                    inlineErrors: true,
+                    enableReCaptcha: true,
+                    paymentMethods: ["card", "apple_pay", "google_pay"],
+                    style: { theme: "ecommerce" }
+                    // Remove amount and currency from here; handle in tokenize
+                  });
           
-                console.log("✅ Fetched amount:", amount);
-          
-                const collect = new TokenizeJs(
-                  "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
-                  "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
-                );
-          
-                collect.mount("card-element", document, {
-                  amount,
-                  currency: "USD",
-                  displayComponents: {
-                    labels: true,
-                    zipCode: true,
-                    firstName: true,
-                    lastName: true,
-                    emailAddress: true,
-                  },
-                  iFrame: {
-                    width: "100%",
-                    height: "400px",
-                    border: "none",
-                    borderRadius: "6px",
-                  },
-                  inlineErrors: true,
-                  enableReCaptcha: true,
-                  paymentMethods: ["card", "apple_pay", "google_pay"],
-                  style: { theme: "ecommerce" },
-                });
-          
-                const paymentButton = document.getElementById("submit");
-                paymentButton.innerText = `Complete Payment - $${amount}`;
-          
-                function showPaymentMessage(message, type = "success") {
-                  const box = document.getElementById("payment-message");
-                  box.innerText = message;
-                  box.style.padding = "10px 15px";
-                  box.style.borderRadius = "6px";
-                  box.style.marginTop = "12px";
-                  box.style.fontWeight = "bold";
-          
-                  if (type === "success") {
-                    box.style.backgroundColor = "#e6ffed";
-                    box.style.color = "#067d45";
-                    box.style.border = "1px solid #0f9d58";
-                  } else if (type === "error") {
-                    box.style.backgroundColor = "#ffe6e6";
-                    box.style.color = "#b00020";
-                    box.style.border = "1px solid #ff5f5f";
-                  } else {
-                    box.style.backgroundColor = "#f0f0f0";
-                    box.style.color = "#333";
-                    box.style.border = "1px solid #ccc";
-                  }
-                }
-          
-                let retryCount = 0;
-                const MAX_RETRIES = 2;
-          
-                paymentButton.onclick = () => {
-                  const form = document.getElementById("registrationForm");
-          
-                  if (!form.checkValidity()) {
-                    form.reportValidity();
-                    return;
+                  function showPaymentMessage(message, type = "success") {
+                    const box = document.getElementById("payment-message");
+                    box.innerText = message;
+                    box.style.padding = "10px 15px";
+                    box.style.borderRadius = "6px";
+                    box.style.marginTop = "12px";
+                    box.style.fontWeight = "bold";
+                    if (type === "success") {
+                      box.style.backgroundColor = "#e6ffed";
+                      box.style.color = "#067d45";
+                      box.style.border = "1px solid #0f9d58";
+                    } else if (type === "error") {
+                      box.style.backgroundColor = "#ffe6e6";
+                      box.style.color = "#b00020";
+                      box.style.border = "1px solid #ff5f5f";
+                    } else {
+                      box.style.backgroundColor = "#f0f0f0";
+                      box.style.color = "#333";
+                      box.style.border = "1px solid #ccc";
+                    }
                   }
           
-                  paymentButton.disabled = true;
-                  paymentButton.innerText = "Processing...";
-                  showPaymentMessage("");
-                  collect.getNonce();
-                };
+                  let retryCount = 0;
+                  const MAX_RETRIES = 2;
           
-                collect.on("nonce", async (event) => {
-                  try {
-                    const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        nonce: event.data.nonce,
-                        zip: event.data.zipCode,
-                        email: event.data.emailAddress,
-                        additionalHandler,
-                      }),
-                    });
-          
-                    const result = await res.json();
-          
-                    if (!res.ok) {
-                      retryCount++;
-                      if (retryCount < MAX_RETRIES) {
-                        paymentButton.disabled = false;
-                        paymentButton.innerText = `Complete Payment - $${amount}`;
-                      } else {
-                        paymentButton.innerText = "❌ Retry Limit Reached";
-                      }
-          
-                      console.error("Backend Response (Declined):", result.raw || result.error);
-                      showPaymentMessage(result.message || "❌ Payment was declined.", "error");
+                  document.getElementById("submit").onclick = () => {
+                    const form = document.getElementById("registrationForm");
+                    if (!form.checkValidity()) {
+                      form.reportValidity();
                       return;
                     }
           
-                    showPaymentMessage("✅ " + result.message, "success");
-                  } catch (err) {
-                    console.error("❌ Error submitting payment:", err);
-                    showPaymentMessage("❌ Payment failed.", "error");
-                    paymentButton.disabled = false;
-                    paymentButton.innerText = `Complete Payment - $${amount}`;
-                  }
-                });
+                    document.getElementById("submit").disabled = true;
+                    document.getElementById("submit").innerText = "Processing...";
+                    showPaymentMessage("");
           
-                collect.on("error", (event) => {
-                  console.error("Poynt Error:", event);
-                  showPaymentMessage("❌ Payment form incomplete or invalid.", "error");
-                  paymentButton.disabled = false;
-                  paymentButton.innerText = `Complete Payment - $${amount}`;
-                });
+                    // Tokenize with amount for Apple Pay
+                    collect.tokenize({
+                      amount: parseFloat(data.amount) * 100, // Convert to cents (e.g., 1999)
+                      currency: "USD"
+                    });
+                  };
           
-              } catch (e) {
-                console.error("❌ Failed to fetch amount or mount TokenizeJs:", e);
-                document.getElementById("payment-message").innerText = "❌ Could not load payment form.";
-              }
+                  collect.on("nonce", async (event) => {
+                    try {
+                      const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          nonce: event.data.nonce,
+                          zip: event.data.zipCode,
+                          email: event.data.emailAddress,
+                          additionalHandler: document.getElementById("additionalHandler")?.value || "off"
+                        }),
+                      });
+          
+                      const result = await res.json();
+          
+                      if (!res.ok) {
+                        retryCount++;
+                        if (retryCount < MAX_RETRIES) {
+                          document.getElementById("submit").disabled = false;
+                          document.getElementById("submit").innerText = `Complete Payment - $${data.amount}`;
+                        } else {
+                          document.getElementById("submit").innerText = "❌ Retry Limit Reached";
+                        }
+                        console.error("Backend Response (Declined):", result.raw || result.error);
+                        showPaymentMessage(result.message || "❌ Payment was declined.", "error");
+                        return;
+                      }
+          
+                      showPaymentMessage("✅ " + result.message, "success");
+                    } catch (err) {
+                      console.error("❌ Error submitting payment:", err);
+                      showPaymentMessage("❌ Payment failed.", "error");
+                      document.getElementById("submit").disabled = false;
+                      document.getElementById("submit").innerText = `Complete Payment - $${data.amount}`;
+                    }
+                  });
+          
+                  collect.on("error", (event) => {
+                    console.error("Poynt Error:", event);
+                    showPaymentMessage("❌ Payment form incomplete or invalid. Please check and try again.", "error");
+                    document.getElementById("submit").disabled = false;
+                    document.getElementById("submit").innerText = `Complete Payment - $${data.amount}`;
+                  });
+                })
+                .catch(error => {
+                  console.error("Error fetching amount:", error);
+                  showPaymentMessage("❌ Unable to load payment form.", "error");
+                });
             };
           
             document.head.appendChild(script);
