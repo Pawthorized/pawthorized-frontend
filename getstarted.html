@@ -196,139 +196,198 @@
             script.async = true;
           
             script.onload = () => {
-              fetch("https://pawthorized-backend.onrender.com/get-amount", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-  additionalHandler: document.getElementById("additionalHandler")?.checked ? "on" : "off"
-})
-
-              })
-                .then(response => response.json())
-                .then(data => {
-                  console.log("Fetched amount:", data.amount); // Debug: "19.99" or "29.98"
+              const collect = new TokenizeJs(
+                "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
+                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
+              );
           
-                  const collect = new TokenizeJs(
-                    "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
-                    "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
-                  );
+              collect.mount("card-element", document, {
+                displayComponents: { labels: true, zipCode: true, firstName: true, lastName: true, emailAddress: true },
+                iFrame: { width: "100%", height: "400px", border: "none", borderRadius: "6px" },
+                inlineErrors: true,
+                enableReCaptcha: true,
+                paymentMethods: ["card", "apple_pay", "google_pay"],
+                style: { theme: "ecommerce" }
+              });
           
-                  collect.mount("card-element", document, {
-                    displayComponents: {
-                      labels: true,
-                      zipCode: true,
-                      firstName: true,
-                      lastName: true,
-                      emailAddress: true,
-                    },
-                    iFrame: {
-                      width: "100%",
-                      height: "400px",
-                      border: "none",
-                      borderRadius: "6px",
-                    },
-                    inlineErrors: true,
-                    enableReCaptcha: true,
-                    paymentMethods: ["card", "apple_pay", "google_pay"],
-                    style: { theme: "ecommerce" },
-                    amount: parseFloat(data.amount) * 100, // Convert to cents: 1999 or 2998
-                    currency: "USD"
-                  });
+              function showPaymentMessage(message, type = "success") {
+                const box = document.getElementById("payment-message");
+                box.innerText = message;
+                box.style.padding = "10px 15px";
+                box.style.borderRadius = "6px";
+                box.style.marginTop = "12px";
+                box.style.fontWeight = "bold";
+                if (type === "success") {
+                  box.style.backgroundColor = "#e6ffed";
+                  box.style.color = "#067d45";
+                  box.style.border = "1px solid #0f9d58";
+                } else if (type === "error") {
+                  box.style.backgroundColor = "#ffe6e6";
+                  box.style.color = "#b00020";
+                  box.style.border = "1px solid #ff5f5f";
+                } else {
+                  box.style.backgroundColor = "#f0f0f0";
+                  box.style.color = "#333";
+                  box.style.border = "1px solid #ccc";
+                }
+              }
           
-                  function showPaymentMessage(message, type = "success") {
-                    const box = document.getElementById("payment-message");
-                    box.innerText = message;
-                    box.style.padding = "10px 15px";
-                    box.style.borderRadius = "6px";
-                    box.style.marginTop = "12px";
-                    box.style.fontWeight = "bold";
-                    if (type === "success") {
-                      box.style.backgroundColor = "#e6ffed";
-                      box.style.color = "#067d45";
-                      box.style.border = "1px solid #0f9d58";
-                    } else if (type === "error") {
-                      box.style.backgroundColor = "#ffe6e6";
-                      box.style.color = "#b00020";
-                      box.style.border = "1px solid #ff5f5f";
-                    } else {
-                      box.style.backgroundColor = "#f0f0f0";
-                      box.style.color = "#333";
-                      box.style.border = "1px solid #ccc";
+              function resetButton(amount) {
+                document.getElementById("submit").disabled = false;
+                document.getElementById("submit").innerText = `Complete Payment - $${amount}`;
+              }
+          
+              document.getElementById("submit").onclick = () => {
+                const form = document.getElementById("registrationForm");
+                if (!form.checkValidity()) {
+                  form.reportValidity();
+                  return;
+                }
+          
+                document.getElementById("submit").disabled = true;
+                document.getElementById("submit").innerText = "Processing...";
+                showPaymentMessage("");
+          
+                fetch("https://pawthorized-backend.onrender.com/get-amount", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ additionalHandler: document.getElementById("additionalHandler").checked ? "on" : "off" })
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log("Fetched amount:", data.amount);
+                    const amountInCents = parseFloat(data.amount) * 100; // e.g., 1999 or 2998
+                    const amountInDollars = parseFloat(data.amount).toFixed(2); // e.g., "19.99" or "29.98"
+          
+                    // Apple Pay Handling
+                    if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+                      const paymentRequest = {
+                        countryCode: "US",
+                        currencyCode: "USD",
+                        supportedNetworks: ["visa", "masterCard", "amex", "discover"],
+                        merchantCapabilities: ["supports3DS"],
+                        total: { label: "Pawthorized", amount: amountInDollars }
+                      };
+          
+                      const session = new ApplePaySession(6, paymentRequest);
+                      session.begin();
+          
+                      session.onvalidatemerchant = async (event) => {
+                        // Simplified: Assume Poynt handles merchant validation internally
+                        // In production, fetch a merchant session from your server if required
+                        session.completeMerchantValidation({}); // Placeholder for Poynt integration
+                        collect.tokenize({ amount: amountInCents, currency: "USD" });
+                      };
+          
+                      session.onpaymentauthorized = (event) => {
+                        collect.tokenize({ amount: amountInCents, currency: "USD" });
+                        session.completePayment(ApplePaySession.STATUS_SUCCESS);
+                      };
+          
+                      session.oncancel = () => {
+                        showPaymentMessage("❌ Payment cancelled.", "error");
+                        resetButton(amountInDollars);
+                      };
                     }
-                  }
+                    // Google Pay Handling
+                    else if (window.PaymentRequest) {
+                      const paymentRequest = {
+                        apiVersion: 2,
+                        apiVersionMinor: 0,
+                        allowedPaymentMethods: [{
+                          type: "CARD",
+                          parameters: {
+                            allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                            allowedCardNetworks: ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
+                          },
+                          tokenizationSpecification: {
+                            type: "PAYMENT_GATEWAY",
+                            parameters: {
+                              gateway: "poynt",
+                              gatewayMerchantId: "5fce6843-6d14-4efe-9a76-88d15d1b2557"
+                            }
+                          }
+                        }],
+                        merchantInfo: { merchantId: "5fce6843-6d14-4efe-9a76-88d15d1b2557", merchantName: "Pawthorized" },
+                        transactionInfo: {
+                          totalPriceStatus: "FINAL",
+                          totalPrice: amountInDollars,
+                          currencyCode: "USD"
+                        }
+                      };
           
-                  let retryCount = 0;
-                  const MAX_RETRIES = 2;
-          
-                  document.getElementById("submit").onclick = () => {
-                    const form = document.getElementById("registrationForm");
-                    if (!form.checkValidity()) {
-                      form.reportValidity();
-                      return;
-                    }
-          
-                    document.getElementById("submit").disabled = true;
-                    document.getElementById("submit").innerText = "Processing...";
-                    showPaymentMessage("");
-                    collect.getNonce(); // Revert to getNonce for consistency
-                  };
-          
-                  collect.on("nonce", async (event) => {
-                    console.log("Nonce event:", event); // Debug: Check amount here
-                    try {
-                      const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          nonce: event.data.nonce,
-                          zip: event.data.zipCode,
-                          email: event.data.emailAddress,
-                          additionalHandler: document.getElementById("additionalHandler")?.checked ? "on" : "off"
-
-                        }),
+                      const request = new PaymentRequest([paymentRequest], {
+                        total: { label: "Total", amount: { currency: "USD", value: amountInDollars } }
                       });
           
-                      const result = await res.json();
-          
-                      if (!res.ok) {
-                        retryCount++;
-                        if (retryCount < MAX_RETRIES) {
-                          document.getElementById("submit").disabled = false;
-                          document.getElementById("submit").innerText = `Complete Payment - $${data.amount}`;
-                        } else {
-                          document.getElementById("submit").innerText = "❌ Retry Limit Reached";
-                        }
-                        console.error("Backend Response (Declined):", result.raw || result.error);
-                        showPaymentMessage(result.message || "❌ Payment was declined.", "error");
-                        return;
-                      }
-          
-                      showPaymentMessage("✅ " + result.message, "success");
-                    } catch (err) {
-                      console.error("❌ Error submitting payment:", err);
-                      showPaymentMessage("❌ Payment failed.", "error");
-                      document.getElementById("submit").disabled = false;
-                      document.getElementById("submit").innerText = `Complete Payment - $${data.amount}`;
+                      request.canMakePayment()
+                        .then(canPay => {
+                          if (canPay) {
+                            request.show()
+                              .then(response => {
+                                response.complete("success");
+                                collect.tokenize({ amount: amountInCents, currency: "USD" });
+                              })
+                              .catch(err => {
+                                console.error("Google Pay error:", err);
+                                showPaymentMessage("❌ Payment cancelled.", "error");
+                                resetButton(amountInDollars);
+                              });
+                          } else {
+                            collect.tokenize({ amount: amountInCents, currency: "USD" });
+                          }
+                        })
+                        .catch(err => {
+                          console.error("Google Pay canMakePayment error:", err);
+                          collect.tokenize({ amount: amountInCents, currency: "USD" });
+                        });
                     }
+                    // Fallback for card payments
+                    else {
+                      collect.tokenize({ amount: amountInCents, currency: "USD" });
+                    }
+                  })
+                  .catch(error => {
+                    console.error("Fetch error:", error);
+                    showPaymentMessage("❌ Unable to load payment.", "error");
+                    resetButton("19.99"); // Default fallback
+                  });
+              };
+          
+              collect.on("nonce", async (event) => {
+                try {
+                  const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      nonce: event.data.nonce,
+                      zip: event.data.zipCode,
+                      email: event.data.emailAddress,
+                      additionalHandler: document.getElementById("additionalHandler").checked ? "on" : "off"
+                    })
                   });
           
-                  collect.on("error", (event) => {
-                    console.error("Poynt Error:", event);
-                    showPaymentMessage("❌ Payment form incomplete or invalid. Please check and try again.", "error");
-                    document.getElementById("submit").disabled = false;
-                    document.getElementById("submit").innerText = `Complete Payment - $${data.amount}`;
-                  });
-                })
-                .catch(error => {
-                  console.error("Error fetching amount:", error);
-                  showPaymentMessage("❌ Unable to load payment form.", "error");
-                });
+                  const result = await res.json();
+                  if (!res.ok) {
+                    throw new Error(result.message || "Payment declined");
+                  }
+                  showPaymentMessage("✅ " + result.message, "success");
+                } catch (err) {
+                  console.error("Nonce error:", err);
+                  showPaymentMessage("❌ " + err.message, "error");
+                  resetButton(event.data.amount ? (event.data.amount / 100).toFixed(2) : "19.99");
+                }
+              });
+          
+              collect.on("error", (event) => {
+                console.error("Poynt Error:", event);
+                showPaymentMessage("❌ Payment form error.", "error");
+                resetButton("19.99"); // Default fallback
+              });
             };
           
             document.head.appendChild(script);
           </script>
-          
-          
     
 
         
