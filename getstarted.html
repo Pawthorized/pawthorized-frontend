@@ -197,8 +197,8 @@
           
             script.onload = () => {
               const collect = new TokenizeJs(
-                "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
-                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
+                "5fce6843-6d14-4efe-9a76-88d15d1b2557",
+                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a"
               );
           
               collect.mount("card-element", document, {
@@ -212,23 +212,35 @@
           
               function showPaymentMessage(message, type = "success") {
                 const box = document.getElementById("payment-message");
-                box.innerText = message;
+          
                 box.style.padding = "10px 15px";
                 box.style.borderRadius = "6px";
                 box.style.marginTop = "12px";
                 box.style.fontWeight = "bold";
-                if (type === "success") {
+          
+                if (type === "loading") {
+                  box.innerHTML = `
+                    <div class="loading-bar-container">
+                      <div class="loading-bar"></div>
+                    </div>
+                  `;
                   box.style.backgroundColor = "#e6ffed";
-                  box.style.color = "#067d45";
                   box.style.border = "1px solid #0f9d58";
-                } else if (type === "error") {
-                  box.style.backgroundColor = "#ffe6e6";
-                  box.style.color = "#b00020";
-                  box.style.border = "1px solid #ff5f5f";
                 } else {
-                  box.style.backgroundColor = "#f0f0f0";
-                  box.style.color = "#333";
-                  box.style.border = "1px solid #ccc";
+                  box.innerText = message;
+                  if (type === "success") {
+                    box.style.backgroundColor = "#e6ffed";
+                    box.style.color = "#067d45";
+                    box.style.border = "1px solid #0f9d58";
+                  } else if (type === "error") {
+                    box.style.backgroundColor = "#ffe6e6";
+                    box.style.color = "#b00020";
+                    box.style.border = "1px solid #ff5f5f";
+                  } else {
+                    box.style.backgroundColor = "#f0f0f0";
+                    box.style.color = "#333";
+                    box.style.border = "1px solid #ccc";
+                  }
                 }
               }
           
@@ -236,6 +248,8 @@
                 document.getElementById("submit").disabled = false;
                 document.getElementById("submit").innerText = `Complete Payment - $${amount}`;
               }
+          
+              let amountInDollars = "19.99"; // global fallback
           
               document.getElementById("submit").onclick = () => {
                 const form = document.getElementById("registrationForm");
@@ -246,7 +260,7 @@
           
                 document.getElementById("submit").disabled = true;
                 document.getElementById("submit").innerText = "Processing...";
-                showPaymentMessage("");
+                showPaymentMessage("", "loading");
           
                 fetch("https://pawthorized-backend.onrender.com/get-amount", {
                   method: "POST",
@@ -256,10 +270,10 @@
                   .then(response => response.json())
                   .then(data => {
                     console.log("Fetched amount:", data.amount);
-                    const amountInCents = parseFloat(data.amount) * 100; // e.g., 1999 or 2998
-                    const amountInDollars = parseFloat(data.amount).toFixed(2); // e.g., "19.99" or "29.98"
+                    const amountInCents = parseFloat(data.amount) * 100;
+                    amountInDollars = parseFloat(data.amount).toFixed(2);
           
-                    // Apple Pay Handling
+                    // Apple Pay
                     if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
                       const paymentRequest = {
                         countryCode: "US",
@@ -273,9 +287,7 @@
                       session.begin();
           
                       session.onvalidatemerchant = async (event) => {
-                        // Simplified: Assume Poynt handles merchant validation internally
-                        // In production, fetch a merchant session from your server if required
-                        session.completeMerchantValidation({}); // Placeholder for Poynt integration
+                        session.completeMerchantValidation({});
                         collect.tokenize({ amount: amountInCents, currency: "USD" });
                       };
           
@@ -289,7 +301,8 @@
                         resetButton(amountInDollars);
                       };
                     }
-                    // Google Pay Handling
+          
+                    // Google Pay
                     else if (window.PaymentRequest) {
                       const paymentRequest = {
                         apiVersion: 2,
@@ -342,7 +355,8 @@
                           collect.tokenize({ amount: amountInCents, currency: "USD" });
                         });
                     }
-                    // Fallback for card payments
+          
+                    // Fallback for card
                     else {
                       collect.tokenize({ amount: amountInCents, currency: "USD" });
                     }
@@ -350,7 +364,7 @@
                   .catch(error => {
                     console.error("Fetch error:", error);
                     showPaymentMessage("❌ Unable to load payment.", "error");
-                    resetButton("19.99"); // Default fallback
+                    resetButton(amountInDollars);
                   });
               };
           
@@ -368,26 +382,25 @@
                   });
           
                   const result = await res.json();
-                  if (!res.ok) {
-                    throw new Error(result.message || "Payment declined");
-                  }
+                  if (!res.ok) throw new Error(result.message || "Payment declined");
                   showPaymentMessage("✅ " + result.message, "success");
                 } catch (err) {
                   console.error("Nonce error:", err);
                   showPaymentMessage("❌ " + err.message, "error");
-                  resetButton(event.data.amount ? (event.data.amount / 100).toFixed(2) : "19.99");
+                  resetButton(event.data.amount ? (event.data.amount / 100).toFixed(2) : amountInDollars);
                 }
               });
           
               collect.on("error", (event) => {
                 console.error("Poynt Error:", event);
                 showPaymentMessage("❌ Payment form error.", "error");
-                resetButton("19.99"); // Default fallback
+                resetButton(amountInDollars);
               });
             };
           
             document.head.appendChild(script);
           </script>
+          
     
 
         

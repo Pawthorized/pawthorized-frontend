@@ -11183,3 +11183,36 @@ footer a:hover, footer a:active, footer a:focus {
 .is-valid {
   border: 2px solid green;
 }
+/* Fancy gradient loader inside #payment-message */
+.loading-bar-container {
+  position: relative;
+  height: 6px;
+  background: #e6ffed;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.loading-bar {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #33cc99,
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+  border-radius: 3px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
