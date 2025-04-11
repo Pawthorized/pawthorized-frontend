@@ -251,13 +251,15 @@
               }
           
               function resetButton(amount) {
-                document.getElementById("submit").disabled = false;
-                document.getElementById("submit").innerText = `Complete Payment - $${amount}`;
+                const btn = document.getElementById("submit");
+                btn.disabled = false;
+                btn.innerText = `Complete Payment - $${amount}`;
               }
           
-              let amountInDollars = "19.99"; // fallback
+              let amountInDollars = "19.99";
           
-              document.getElementById("submit").onclick = () => {
+              document.getElementById("submit").onclick = (e) => {
+                e.preventDefault();
                 const form = document.getElementById("registrationForm");
                 if (!form.checkValidity()) {
                   form.reportValidity();
@@ -287,32 +289,33 @@
                   });
               };
           
+              // ✅ Updated: Use FormData to send all fields + nonce to /charge
               collect.on("nonce", async (event) => {
                 try {
+                  const form = document.getElementById("registrationForm");
+                  const formData = new FormData(form);
+          
+                  formData.append("nonce", event.data.nonce);
+                  formData.append("zip", event.data.zipCode);
+                  formData.append("email", event.data.emailAddress || document.getElementById("email").value);
+          
                   const res = await fetch("https://pawthorized-backend.onrender.com/charge", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      nonce: event.data.nonce,
-                      zip: event.data.zipCode,
-                      email: event.data.emailAddress,
-                      additionalHandler: document.getElementById("additionalHandler").checked ? "on" : "off"
-                    })
+                    body: formData
                   });
           
                   const result = await res.json();
-                  if (!res.ok) throw new Error(result.message || "Payment declined");
+                  if (!result.success) throw new Error(result.message);
           
-                  showPaymentMessage("✅ " + result.message, "success");
+                  showPaymentMessage("✅ Payment successful! Creating pass...", "success");
           
-                  // ✅ Wait 1 second and submit the form
                   setTimeout(() => {
-                    document.getElementById("registrationForm").submit();
+                    window.location.href = result.redirectUrl;
                   }, 1000);
                 } catch (err) {
-                  console.error("Nonce error:", err);
+                  console.error("Process error:", err);
                   showPaymentMessage("❌ " + err.message, "error");
-                  resetButton(event.data.amount ? (event.data.amount / 100).toFixed(2) : amountInDollars);
+                  resetButton(amountInDollars);
                 }
               });
           
