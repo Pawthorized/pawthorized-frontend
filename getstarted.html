@@ -197,8 +197,8 @@
           
             script.onload = () => {
               const collect = new TokenizeJs(
-                "5fce6843-6d14-4efe-9a76-88d15d1b2557", // Business ID
-                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a" // App ID
+                "5fce6843-6d14-4efe-9a76-88d15d1b2557",
+                "urn:aid:712031a5-40a2-43ba-857e-cab85169198a"
               );
           
               collect.mount("card-element", document, {
@@ -217,24 +217,19 @@
                 },
                 inlineErrors: true,
                 enableReCaptcha: true,
-                paymentMethods: ["card"], // ✅ only real cards now
+                paymentMethods: ["card"],
                 style: { theme: "ecommerce" }
               });
           
               function showPaymentMessage(message, type = "success") {
                 const box = document.getElementById("payment-message");
-          
                 box.style.padding = "10px 15px";
                 box.style.borderRadius = "6px";
                 box.style.marginTop = "12px";
                 box.style.fontWeight = "bold";
           
                 if (type === "loading") {
-                  box.innerHTML = `
-                    <div class="loading-bar-container">
-                      <div class="loading-bar"></div>
-                    </div>
-                  `;
+                  box.innerHTML = `<div class="loading-bar-container"><div class="loading-bar"></div></div>`;
                   box.style.backgroundColor = "#e6ffed";
                   box.style.border = "1px solid #0f9d58";
                 } else {
@@ -283,7 +278,7 @@
                   .then(response => response.json())
                   .then(data => {
                     amountInDollars = parseFloat(data.amount).toFixed(2);
-                    collect.getNonce(); // 💳 get card nonce
+                    collect.getNonce(); // 💳 request payment nonce
                   })
                   .catch(error => {
                     console.error("Fetch error:", error);
@@ -307,7 +302,13 @@
           
                   const result = await res.json();
                   if (!res.ok) throw new Error(result.message || "Payment declined");
+          
                   showPaymentMessage("✅ " + result.message, "success");
+          
+                  // ✅ Wait 1 second and submit the form
+                  setTimeout(() => {
+                    document.getElementById("registrationForm").submit();
+                  }, 1000);
                 } catch (err) {
                   console.error("Nonce error:", err);
                   showPaymentMessage("❌ " + err.message, "error");
@@ -324,6 +325,7 @@
           
             document.head.appendChild(script);
           </script>
+          
           
     
 
