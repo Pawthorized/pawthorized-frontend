@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Etsy Order Verification | Pawthorized</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    main {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    /* Logo Pulse */
+    .logo-container {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 30px;
+      position: relative;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Check overlay */
+    .check-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      animation: pop 0.4s ease-out forwards;
+    }
+
+    .check-overlay svg {
+      width: 60px;
+      height: 60px;
+      stroke: #004AAD;
+      stroke-width: 6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    input {
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    button {
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: #004AAD;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #00368a;
+    }
+
+    #message {
+      color: red;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- 🛡️ Logo Animation -->
+    <div class="logo-container" id="logoPulse">
+      <img src="assets/img/paw_heart.png" alt="Paw in Shield Logo" />
+      <div class="check-overlay" id="checkOverlay">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" stroke="#004AAD" stroke-width="5" fill="none" />
+          <path d="M30 50 L45 65 L70 35" />
+        </svg>
+      </div>
+    </div>
+
+    <h1>Verify Your Etsy Order</h1>
+    <p>Enter your Etsy Order ID and email to continue:</p>
+
+    <form id="verifyEtsyForm">
+      <input type="text" name="orderId" placeholder="Etsy Order ID" required />
+      <input type="email" name="email" placeholder="Email used on Etsy" required />
+      <button type="submit">Continue</button>
+    </form>
+
+    <p id="message"></p>
+  </main>
+
+  <script>
+    const form = document.getElementById("verifyEtsyForm");
+    const logoPulse = document.getElementById("logoPulse");
+    const checkOverlay = document.getElementById("checkOverlay");
+    const messageEl = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      messageEl.textContent = "";
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch("/etsy/verify-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          // show check overlay
+          checkOverlay.style.display = "flex";
+          logoPulse.querySelector("img").style.opacity = "0.2";
+          logoPulse.style.animation = "none";
+
+          setTimeout(() => {
+            window.location.href = `/etsyform.html?orderId=${data.orderId}`;
+          }, 1500);
+        } else {
+          messageEl.textContent = result.message || "Verification failed.";
+        }
+      } catch (err) {
+        messageEl.textContent = "Something went wrong. Please try again.";
+      }
+    });
+  </script>
+</body>
+</html>

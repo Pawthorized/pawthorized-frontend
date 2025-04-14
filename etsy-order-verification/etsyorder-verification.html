@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Etsy Order Verification | Pawthorized</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Verify Your Etsy Order</h1>
+    <p>Enter your Etsy Order ID and email to continue:</p>
+
+    <form id="verifyEtsyForm">
+      <input type="text" name="orderId" placeholder="Etsy Order ID" required />
+      <input type="email" name="email" placeholder="Email used on Etsy" required />
+      <button type="submit">Continue</button>
+    </form>
+
+    <p id="message" style="color: red; margin-top: 1rem;"></p>
+  </div>
+
+  <script>
+    document.getElementById("verifyEtsyForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch("/etsy/verify-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        window.location.href = `/etsyform.html?orderId=${data.orderId}`;
+      } else {
+        document.getElementById("message").textContent = result.message || "Verification failed.";
+      }
+    });
+  </script>
+</body>
+</html>
